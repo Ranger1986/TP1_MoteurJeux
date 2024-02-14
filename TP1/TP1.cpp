@@ -23,6 +23,7 @@ using namespace glm;
 #include <common/vboindexer.hpp>
 
 void processInput(GLFWwindow *window);
+void createSquarePlan(std::vector<glm::vec3> & indexed_vertices , std::vector<unsigned short> & indices, std::vector<std::vector<unsigned short> > & triangles, int vertices_cote, vec3 leftUp, int longueur_cote);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -115,17 +116,31 @@ int main( void )
     //Chargement du fichier de maillage
     //std::string filename("chair.off");
     //loadOFF(filename, indexed_vertices, indices, triangles );
-    indexed_vertices.push_back(vec3(0.0,0.0,0.0));
-    indexed_vertices.push_back(vec3(1.0,0.0,0.0));
-    indexed_vertices.push_back(vec3(0.0,1.0,0.0));
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
-    std::vector<unsigned short> t1;
-    t1.push_back(0);
-    t1.push_back(1);
-    t1.push_back(2);
-    triangles.push_back(t1);
+    //createSquarePlan(indexed_vertices, indices, triangles, 16, vec3(0,0,0), 1);
+    
+    float vertices_cote=16;
+    float longueur_cote=1;
+    vec3 leftUp = vec3(0.0,0.0,0.0);
+    for (int i = 0; i < vertices_cote; i++)
+    {
+        for (int j = 0; j < vertices_cote; j++)
+        {
+            indexed_vertices.push_back(leftUp + vec3(longueur_cote/vertices_cote*i,-longueur_cote/vertices_cote*j,0.0));
+        }
+    }
+    int k=0;
+    for (int i = 0; i < vertices_cote-1; i++)
+    {
+        for (int j = 0; j < vertices_cote-1; j++)
+        {
+            indices.push_back(i*vertices_cote+j);
+            indices.push_back((i+1)*vertices_cote+j);
+            indices.push_back((i+1)*vertices_cote+j+1);
+            indices.push_back(i*vertices_cote+j);
+            indices.push_back(i*vertices_cote+j+1);
+            indices.push_back((i+1)*vertices_cote+j+1);
+        }
+    }
     // Load it into a VBO
 
     GLuint vertexbuffer;
@@ -249,6 +264,32 @@ void processInput(GLFWwindow *window)
 
 }
 
+void createSquarePlan(std::vector<glm::vec3> & indexed_vertices , std::vector<unsigned short> & indices, std::vector<std::vector<unsigned short> > & triangles,
+    int vertices_cote, vec3 leftUp, int longueur_cote){
+    for (int i = 0; i < vertices_cote; i++)
+    {
+        for (int j = 0; j < vertices_cote; j++)
+        {
+            indexed_vertices.push_back(leftUp + vec3(longueur_cote/vertices_cote*i,longueur_cote/vertices_cote*j,0.0));
+            indices.push_back(i*vertices_cote+j);
+        }
+    }
+    for (int i = 0; i < vertices_cote-1; i++)
+    {
+        for (int j = 0; j < vertices_cote-1; j++)
+        {
+            std::vector<unsigned short> t1, t2;
+            t1.push_back(i*vertices_cote+j);
+            t1.push_back((i+1)*vertices_cote+j);
+            t1.push_back((i+1)*vertices_cote+j+1);
+            t2.push_back(i*vertices_cote+j);
+            t2.push_back(i*vertices_cote+j+1);
+            t2.push_back((i+1)*vertices_cote+j+1);
+            triangles.push_back(t1);
+            triangles.push_back(t2);
+        }
+    }
+}
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
