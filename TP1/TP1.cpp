@@ -113,9 +113,19 @@ int main( void )
     std::vector<glm::vec3> indexed_vertices;
 
     //Chargement du fichier de maillage
-    std::string filename("chair.off");
-    loadOFF(filename, indexed_vertices, indices, triangles );
-
+    //std::string filename("chair.off");
+    //loadOFF(filename, indexed_vertices, indices, triangles );
+    indexed_vertices.push_back(vec3(0.0,0.0,0.0));
+    indexed_vertices.push_back(vec3(1.0,0.0,0.0));
+    indexed_vertices.push_back(vec3(0.0,1.0,0.0));
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    std::vector<unsigned short> t1;
+    t1.push_back(0);
+    t1.push_back(1);
+    t1.push_back(2);
+    triangles.push_back(t1);
     // Load it into a VBO
 
     GLuint vertexbuffer;
