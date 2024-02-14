@@ -122,27 +122,6 @@ int main( void )
     vec3 leftUp = vec3(0.0,0.0,0.0);
     createSquarePlan(indexed_vertices, indices, vertices_cote, leftUp, longueur_cote);
     std::cout<<std::endl<<indices[256]<<std::endl<<std::endl;
-    /*
-    for (int i = 0; i < vertices_cote; i++)
-    {
-        for (int j = 0; j < vertices_cote; j++)
-        {
-            indexed_vertices.push_back(leftUp + vec3(longueur_cote/(vertices_cote-1)*i,-longueur_cote/(vertices_cote-1)*j,0.0));
-        }
-    }
-    for (int i = 0; i < vertices_cote-1; i++)
-    {
-        for (int j = 0; j < vertices_cote-1; j++)
-        {
-            indices.push_back(i*vertices_cote+j);
-            indices.push_back((i+1)*vertices_cote+j);
-            indices.push_back((i+1)*vertices_cote+j+1);
-            indices.push_back(i*vertices_cote+j);
-            indices.push_back(i*vertices_cote+j+1);
-            indices.push_back((i+1)*vertices_cote+j+1);
-        }
-    }
-    */
     // Load it into a VBO
 
     GLuint vertexbuffer;
