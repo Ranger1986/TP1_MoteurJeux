@@ -168,7 +168,7 @@ int main(void) {
         // View matrix : camera/view transformation lookat() utiliser camera_position camera_target camera_up
         mat4 view = glm::lookAt(
             camera_position,
-            camera_position + camera_target,
+            camera_position+camera_target,
             camera_up);
         // Projection matrix : 45 Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
         mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
@@ -244,7 +244,7 @@ void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsi
                       int vertices_cote, vec3 leftUp, float longueur_cote) {
     for (int i = 0; i < vertices_cote; i++) {
         for (int j = 0; j < vertices_cote; j++) {
-            indexed_vertices.push_back(leftUp + vec3(longueur_cote / (vertices_cote - 1) * i, -longueur_cote / (vertices_cote - 1) * j, 0.0));
+            indexed_vertices.push_back(leftUp + vec3(longueur_cote / (vertices_cote - 1) * i, -longueur_cote / (vertices_cote - 1) * j, static_cast<float>(rand())/RAND_MAX-0.5));
         }
     }
     for (int i = 0; i < vertices_cote - 1; i++) {
