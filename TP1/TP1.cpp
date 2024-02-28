@@ -35,6 +35,10 @@ glm::vec3 camera_position = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_target = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
+//translate
+vec3 shader_translate = vec3(0,0,0);
+GLfloat shader_translateLocation;
+
 // timing
 float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
@@ -177,6 +181,8 @@ int main(void) {
         mat4 MVP = projection*view*model;
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
         glUniformMatrix4fv(MVPlocation,1,GL_FALSE,&MVP[0][0]);
+        shader_translateLocation = glGetUniformLocation(programID, "translate");
+        glUniform3fv(shader_translateLocation,1,&shader_translate[0]);
         /****************************************/
 
         // 1rst attribute buffer : vertices
@@ -236,8 +242,23 @@ void processInput(GLFWwindow* window) {
         camera_position += cameraSpeed * camera_target;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         camera_position -= cameraSpeed * camera_target;
-
     // TODO add translations
+	// Move forward
+	if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
+		shader_translate[1]+=0.1;
+	}
+	// Move backward
+	if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS){
+		shader_translate[1]-=0.1;
+	}
+	// Strafe right
+	if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
+		shader_translate[0]+=0.1;
+	}
+	// Strafe left
+	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS){
+		shader_translate[0]-=0.1;
+	}
 }
 
 void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,
