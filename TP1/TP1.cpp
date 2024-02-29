@@ -50,7 +50,6 @@ float lastFrame = 0.0f;
 float angle = 0.;
 float zoom = 1.;
 
-bool mouse_pressed = false;
 /*******************************************************************************/
 
 int main(void) {
@@ -298,17 +297,19 @@ void createSquarePlanFromHeightmap(std::vector<glm::vec3>& indexed_vertices, std
     std::cout << height << std::endl;
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            indexed_vertices.push_back(leftUp + vec3(longueur_cote / (width - 1) * i, -longueur_cote / (height - 1) * j, static_cast<float>(data[i*width+j])/256));
+            indexed_vertices.push_back(leftUp + vec3(   -longueur_cote / (height - 1) * j,
+                                                        static_cast<float>(data[i*height+j])/256, 
+                                                        longueur_cote / (width - 1) * i));
         }
     }
     for (int i = 0; i < width - 1; i++) {
         for (int j = 0; j < height - 1; j++) {
-            indices.push_back(i * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back(i * height + j);
+            indices.push_back((i + 1) * height + j);
+            indices.push_back((i + 1) * height + j + 1);
+            indices.push_back(i * height + j);
+            indices.push_back(i * height + j + 1);
+            indices.push_back((i + 1) * height + j + 1);
         }
     }
 }
