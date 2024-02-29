@@ -46,6 +46,8 @@ float lastFrame = 0.0f;
 // rotation
 float angle = 0.;
 float zoom = 1.;
+
+bool mouse_pressed = false;
 /*******************************************************************************/
 
 int main(void) {
