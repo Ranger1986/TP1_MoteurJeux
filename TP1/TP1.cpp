@@ -35,10 +35,6 @@ glm::vec3 camera_position = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 camera_target = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-//translate
-vec3 shader_translate = vec3(0,0,0);
-GLfloat shader_translateLocation;
-
 // timing
 float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
@@ -46,6 +42,8 @@ float lastFrame = 0.0f;
 // rotation
 float angle = 0.;
 float zoom = 1.;
+
+bool camLibre = true;
 
 bool mouse_pressed = false;
 /*******************************************************************************/
@@ -122,6 +120,7 @@ int main(void) {
     // std::string filename("chair.off");
     // loadOFF(filename, indexed_vertices, indices, triangles );
 
+    // Plan
     float vertices_cote = 16;
     float longueur_cote = 1;
     vec3 leftUp = vec3(0.0, 0.0, 0.0);
@@ -129,8 +128,8 @@ int main(void) {
     std::cout << std::endl
               << indices[256] << std::endl
               << std::endl;
-    // Load it into a VBO
 
+    // Load it into a VBO
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -183,8 +182,6 @@ int main(void) {
         mat4 MVP = projection*view*model;
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
         glUniformMatrix4fv(MVPlocation,1,GL_FALSE,&MVP[0][0]);
-        shader_translateLocation = glGetUniformLocation(programID, "translate");
-        glUniform3fv(shader_translateLocation,1,&shader_translate[0]);
         /****************************************/
 
         // 1rst attribute buffer : vertices
@@ -238,29 +235,69 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    // Camera zoom in and out
-    float cameraSpeed = 2.5 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_position += cameraSpeed * camera_target;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_position -= cameraSpeed * camera_target;
-    // TODO add translations
-	// Move forward
-	if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
-		shader_translate[1]+=0.1;
-	}
-	// Move backward
-	if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS){
-		shader_translate[1]-=0.1;
-	}
-	// Strafe right
-	if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
-		shader_translate[0]+=0.1;
-	}
-	// Strafe left
-	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS){
-		shader_translate[0]-=0.1;
-	}
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+        if(camLibre == true){
+            camLibre = false;
+        }else{
+            camLibre = true;
+        }
+    }
+
+    // Vitesse de déplacement de la caméra
+    float cameraSpeed = 2.5f * deltaTime;
+
+    // Déplacements caméra libre
+    if (camLibre == true){
+        // Déplacer la caméra vers l'avant
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+            camera_position += cameraSpeed * camera_target;
+        }
+
+        // Déplacer la caméra vers l'arrière
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+            camera_position -= cameraSpeed * camera_target;
+        }
+
+        // Déplacer la caméra vers la droite
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+            camera_position += glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
+        }
+
+        // Déplacer la caméra vers la gauche
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+            camera_position -= glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
+        }
+
+        // Déplacer la caméra vers le haut
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+            camera_position += camera_up * cameraSpeed;
+        }
+
+        // Déplacer la caméra vers le bas
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+            camera_position -= camera_up * cameraSpeed;
+        }
+    }else{
+        // Déplacements caméra orbital (centré sur l'objet)
+        // Calcul de l'angle de rotation basé sur le temps écoulé pour une rotation constante
+        angle += 0.5f * deltaTime;
+
+        // Mettre à jour la position de la caméra pour la vue en rotation autour de l'origine
+        float radius = 3.0f; // Rayon de rotation
+        float camX = sin(angle) * radius;
+        float camZ = cos(angle) * radius;
+        camera_position = glm::vec3(camX, 0.0f, camZ);
+
+        // Définir la cible de la caméra pour regarder l'origine
+        camera_target = glm::normalize(glm::vec3(-camX, 0.0f, -camZ));
+
+        // Définir la matrice de vue pour afficher le terrain sous un angle de 45 degrés
+        mat4 view = glm::lookAt(
+            camera_position,       // Position de la caméra
+            camera_position - camera_target, // Point vers lequel la caméra est orientée (l'origine dans ce cas)
+            camera_up              // Vecteur "haut"
+        );
+    }
 }
 
 void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,
