@@ -1,6 +1,8 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include <iostream>
 #include <vector>
@@ -24,7 +26,8 @@ using namespace glm;
 #include <common/vboindexer.hpp>
 
 void processInput(GLFWwindow* window);
-void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices, int vertices_cote, vec3 leftUp, float longueur_cote);
+void createRandomSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices, int vertices_cote, vec3 leftUp, float longueur_cote);
+void createSquarePlanFromHeightmap(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices, vec3 leftUp, float longueur_cote, char* filename);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -125,7 +128,10 @@ int main(void) {
     float vertices_cote = 16;
     float longueur_cote = 1;
     vec3 leftUp = vec3(0.0, 0.0, 0.0);
-    createSquarePlan(indexed_vertices, indices, vertices_cote, leftUp, longueur_cote);
+    // load height map texture
+    char* heightmapName = "texture/Heightmap_Mountain.png";
+    //createRandomSquarePlan(indexed_vertices, indices, vertices_cote, leftUp, longueur_cote);
+    createSquarePlanFromHeightmap(indexed_vertices, indices, leftUp, longueur_cote, heightmapName);
     std::cout << std::endl
               << indices[256] << std::endl
               << std::endl;
@@ -263,7 +269,7 @@ void processInput(GLFWwindow* window) {
 	}
 }
 
-void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,
+void createRandomSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,
                       int vertices_cote, vec3 leftUp, float longueur_cote) {
     for (int i = 0; i < vertices_cote; i++) {
         for (int j = 0; j < vertices_cote; j++) {
@@ -278,6 +284,31 @@ void createSquarePlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsi
             indices.push_back(i * vertices_cote + j);
             indices.push_back(i * vertices_cote + j + 1);
             indices.push_back((i + 1) * vertices_cote + j + 1);
+        }
+    }
+}
+
+void createSquarePlanFromHeightmap(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,
+                      vec3 leftUp, float longueur_cote, char* filename) {
+    int width, height, nChannels;
+    unsigned char *data = stbi_load(filename,
+                                    &width, &height, &nChannels,
+                                    0);
+    std::cout << width << std::endl;
+    std::cout << height << std::endl;
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            indexed_vertices.push_back(leftUp + vec3(longueur_cote / (width - 1) * i, -longueur_cote / (height - 1) * j, static_cast<float>(data[i*width+j])/256));
+        }
+    }
+    for (int i = 0; i < width - 1; i++) {
+        for (int j = 0; j < height - 1; j++) {
+            indices.push_back(i * width + j);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
         }
     }
 }
