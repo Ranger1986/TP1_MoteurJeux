@@ -23,7 +23,10 @@ void Plan::setRandomHeight() {
 void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices) {
     for (int i = 0; i < width_vertices; i++) {
         for (int j = 0; j < length_vertices; j++) {
-            indexed_vertices.push_back(center + vec3(vertices_distance / (width_vertices - 1) * i, -vertices_distance / (length_vertices - 1) * j, heights[i][j]));
+            indexed_vertices.push_back(center + 
+                vec3(vertices_distance / (length_vertices - 1) * j,
+                    heights[i][j],
+                    vertices_distance / (width_vertices - 1) * i));
         }
     }
     for (int i = 0; i < width_vertices - 1; i++) {
