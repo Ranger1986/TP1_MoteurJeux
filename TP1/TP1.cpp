@@ -125,6 +125,7 @@ int main(void) {
     float longueur_cote = 1;
     vec3 center = vec3(0.0, 0.0, 0.0);
     Plan plan = Plan(center,vertices_cote,vertices_cote);
+    plan.setRandomHeight();
     plan.drawPlan(indexed_vertices, indices);
     std::cout << std::endl
               << indices[256] << std::endl
