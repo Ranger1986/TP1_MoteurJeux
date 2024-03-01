@@ -214,7 +214,7 @@ int main(void) {
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
-
+        angle++;
     }  // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
@@ -237,70 +237,55 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
-        if(camLibre == true){
-            camLibre = false;
-        }else{
-            camLibre = true;
-        }
-    }
-
     // Vitesse de déplacement de la caméra
     float cameraSpeed = 2.5f * deltaTime;
 
-    // Déplacements caméra libre
-    if (camLibre == true){
-        // Déplacer la caméra vers l'avant
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
-            camera_position += cameraSpeed * camera_target;
-        }
+    // Déplacer la caméra vers l'avant
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+        camera_position += cameraSpeed * camera_target;
+    }
 
-        // Déplacer la caméra vers l'arrière
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
-            camera_position -= cameraSpeed * camera_target;
-        }
+    // Déplacer la caméra vers l'arrière
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        camera_position -= cameraSpeed * camera_target;
+    }
 
-        // Déplacer la caméra vers la droite
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-            camera_position += glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
-        }
+    // Déplacer la caméra vers la droite
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        camera_position += glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
+    }
 
-        // Déplacer la caméra vers la gauche
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-            camera_position -= glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
-        }
+    // Déplacer la caméra vers la gauche
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        camera_position -= glm::normalize(glm::cross(camera_target, camera_up)) * cameraSpeed;
+    }
 
-        // Déplacer la caméra vers le haut
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-            camera_position += camera_up * cameraSpeed;
-        }
+    // Déplacer la caméra vers le haut
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        camera_position += camera_up * cameraSpeed;
+    }
 
-        // Déplacer la caméra vers le bas
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-            camera_position -= camera_up * cameraSpeed;
-        }
-    }else{
-        // Déplacements caméra orbital (centré sur l'objet)
-        // Calcul de l'angle de rotation basé sur le temps écoulé pour une rotation constante
-        angle += 0.5f * deltaTime;
+    // Déplacer la caméra vers le bas
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        camera_position -= camera_up * cameraSpeed;
+    }
+    // Déplacer la caméra vers le bas
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+        angle++;
+        mat3 matricerotation = mat3{cos(angle) ,sin(angle),0,-sin(angle),cos(angle),0,0,0,1};
+        camera_position=matricerotation*glm::vec3(0.0f, 0.0f, 3.0f);
+    }
 
-        // Mettre à jour la position de la caméra pour la vue en rotation autour de l'origine
-        float radius = 3.0f; // Rayon de rotation
-        float camX = sin(angle) * radius;
-        float camZ = cos(angle) * radius;
-        camera_position = glm::vec3(camX, 0.0f, camZ);
-
-        // Définir la cible de la caméra pour regarder l'origine
-        camera_target = glm::normalize(glm::vec3(-camX, 0.0f, -camZ));
-
-        // Définir la matrice de vue pour afficher le terrain sous un angle de 45 degrés
-        mat4 view = glm::lookAt(
-            camera_position,       // Position de la caméra
-            camera_position - camera_target, // Point vers lequel la caméra est orientée (l'origine dans ce cas)
-            camera_up              // Vecteur "haut"
-        );
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    {
+        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    }
+        if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+    {
+        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
     }
 }
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
