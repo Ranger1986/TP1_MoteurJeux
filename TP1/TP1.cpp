@@ -22,6 +22,7 @@ using namespace std;
 
 #include <common/objloader.hpp>
 #include <common/shader.hpp>
+#include <common/texture.hpp>
 #include <common/vboindexer.hpp>
 
 void processInput(GLFWwindow* window);
@@ -181,12 +182,10 @@ int main(void) {
     // Create and compile our GLSL program from the shaders
     GLuint programID = LoadShaders("vertex_shader.glsl", "fragment_shader.glsl");
 
-    /*****************TODO***********************/
     // Get a handle for our "Model View Projection" matrices uniforms
     modelMatrix = mat4(1.f);
     viewMatrix = mat4(1.f);
     projectionMatrix = mat4(1.f);
-    /****************************************/
 
     // Plan
     float vertices_cote = 16;
@@ -202,6 +201,8 @@ int main(void) {
     // For speed computation
     double lastTime = glfwGetTime();
     int nbFrames = 0;
+
+    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Mountain.png");
 
     do {
         // Measure speed
@@ -221,18 +222,22 @@ int main(void) {
         // Use our shader
         glUseProgram(programID);
 
-        viewMatrix = lookAt(camera_position, camera_target, camera_up);        
+        viewMatrix = lookAt(camera_position, camera_target, camera_up);
         projectionMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-        if (camorbitale)
-        {
-            viewMatrix=rotate(viewMatrix,radians(angle/10),camera_up);
+        if (camorbitale) {
+            viewMatrix = rotate(viewMatrix, radians(angle / 10), camera_up);
             angle++;
         }
-        
+
         mat4 MVP = projectionMatrix * viewMatrix * modelMatrix;
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
         glUniformMatrix4fv(MVPlocation, 1, GL_FALSE, &MVP[0][0]);
-        /****************************************/
+
+        if (heightmap != -1) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, heightmap);
+            glUniform1i(glGetUniformLocation(programID, "heightmap"), 0);
+        }
 
         // 1rst attribute buffer : vertices
         glEnableVertexAttribArray(0);
@@ -307,12 +312,12 @@ void processInput(GLFWwindow* window) {
     if (camlibre) {
         // Déplacer la caméra vers l'avant
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-            camera_position += cameraSpeed * normalize(camera_position-camera_target);
+            camera_position += cameraSpeed * normalize(camera_position - camera_target);
         }
 
         // Déplacer la caméra vers l'arrière
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-            camera_position -= cameraSpeed * normalize(camera_position-camera_target);
+            camera_position -= cameraSpeed * normalize(camera_position - camera_target);
         }
 
         // Déplacer la caméra vers la droite
@@ -339,8 +344,7 @@ void processInput(GLFWwindow* window) {
             camera_target -= vec3{0, 1, 0} * cameraSpeed;
         }
     }
-    if (camorbitale)
-    {
+    if (camorbitale) {
         // Déplacer la caméra vers le haut
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             camera_position += vec3{0, 1, 0} * cameraSpeed;
@@ -360,7 +364,6 @@ void processInput(GLFWwindow* window) {
             camera_position -= cameraSpeed * camera_front;
         }
     }
-    
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
