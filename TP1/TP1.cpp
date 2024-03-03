@@ -202,7 +202,10 @@ int main(void) {
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Mountain.png");
+    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Rocky.png");
+    GLuint grass_texture = loadTexture2DFromFilePath("texture/grass.png");
+    GLuint rock_texture = loadTexture2DFromFilePath("texture/rock.png");
+    GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
 
     do {
         // Measure speed
@@ -235,8 +238,23 @@ int main(void) {
 
         if (heightmap != -1) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, heightmap);
+            glBindTexture(GL_TEXTURE_2D, grass_texture);
             glUniform1i(glGetUniformLocation(programID, "heightmap"), 0);
+        }
+        if (grass_texture != -1) {
+            glActiveTexture(GL_TEXTURE0+1);
+            glBindTexture(GL_TEXTURE_2D, grass_texture);
+            glUniform1i(glGetUniformLocation(programID, "grass"), 1);
+        }
+        if (rock_texture != -1) {
+            glActiveTexture(GL_TEXTURE0+2);
+            glBindTexture(GL_TEXTURE_2D, rock_texture);
+            glUniform1i(glGetUniformLocation(programID, "rock"), 2);
+        }
+        if (snowrocks_texture != -1) {
+            glActiveTexture(GL_TEXTURE0+3);
+            glBindTexture(GL_TEXTURE_2D, snowrocks_texture);
+            glUniform1i(glGetUniformLocation(programID, "snow"), 3);
         }
 
         // 1rst attribute buffer : vertices
@@ -277,6 +295,10 @@ int main(void) {
     glDeleteBuffers(1, &elementbuffer);
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
+    glDeleteTextures(1, &heightmap);
+    glDeleteTextures(1, &grass_texture);
+    glDeleteTextures(1, &rock_texture);
+    glDeleteTextures(1, &snowrocks_texture);
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();

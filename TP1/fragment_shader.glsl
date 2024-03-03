@@ -1,21 +1,22 @@
 #version 330 core
 
 // Ouput data
+out vec4 FragColor;
 out vec3 color;
 
-// in vec2 uv;
+in vec2 uv;
 in float height;
 
+uniform sampler2D grass;
+uniform sampler2D rock;
+uniform sampler2D snow;
+
 void main(){
-    if (height <= 0){
-        color =vec3(0.1, 0.1,0.1);
+    if (height > 0.3){
+        FragColor=texture(snow,uv);
+    } else if (height > 0){
+        FragColor=texture(rock,uv);
     } else {
-        color=vec3(0.9,0.9,0.9);
+        FragColor=texture(grass,uv);
     }
-    // if(height<0.5f){
-    //     color =vec3(0.1, 0.1,0.1);
-    // }
-    // else{
-    //     color =vec3(0.9, 0.9,0.9);
-    // }
 }
