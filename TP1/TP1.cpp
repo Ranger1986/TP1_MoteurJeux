@@ -54,9 +54,11 @@ mat4 projectionMatrix;
 // donnees 3d
 vector<unsigned short> indices;
 vector<vec3> indexed_vertices;
+vector<float> texCoords;
 // buffers
 GLuint vertexbuffer;
 GLuint elementbuffer;
+GLuint uv;
 
 class Plan {
    private:
@@ -100,6 +102,8 @@ void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsign
                                        vec3(vertices_distance * j - half_width,
                                             heights[i][j],
                                             vertices_distance * i - half_length));
+            texCoords.push_back((float)i / (float)width_vertices);
+            texCoords.push_back((float)j / (float)length_vertices);
         }
     }
     for (int i = 0; i < width_vertices - 1; i++) {
@@ -107,9 +111,29 @@ void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsign
             indices.push_back(i * length_vertices + j);
             indices.push_back((i + 1) * length_vertices + j);
             indices.push_back((i + 1) * length_vertices + j + 1);
+
             indices.push_back(i * length_vertices + j);
             indices.push_back(i * length_vertices + j + 1);
             indices.push_back((i + 1) * length_vertices + j + 1);
+
+            texCoords.push_back((float)(i + 1) / (float)width_vertices);
+            texCoords.push_back((float)j / (float)length_vertices);
+
+            texCoords.push_back((float)(i + 1) / (float)width_vertices);
+            texCoords.push_back((float)(j + 1) / (float)length_vertices);
+
+            texCoords.push_back((float)(i) / (float)width_vertices);
+            texCoords.push_back((float)(j + 1) / (float)length_vertices);
+
+            texCoords.push_back((float)(i) / (float)width_vertices);
+            texCoords.push_back((float)j / (float)length_vertices);
+
+            texCoords.push_back((float)(i + 1) / (float)width_vertices);
+            texCoords.push_back((float)(j) / (float)length_vertices);
+
+            texCoords.push_back((float)(i) / (float)width_vertices);
+            texCoords.push_back((float)(j + 1) / (float)length_vertices);
+
         }
     }
     // Load it into a VBO
@@ -121,6 +145,10 @@ void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsign
     glGenBuffers(1, &elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+
+    glGenBuffers(1, &uv);
+    glBindBuffer(GL_ARRAY_BUFFER, uv);
+    glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(unsigned short), &texCoords[0], GL_STATIC_DRAW);
 }
 int main(void) {
     // Initialise GLFW
@@ -191,7 +219,6 @@ int main(void) {
     float vertices_cote = 16;
     vec3 center = vec3(0.0, 0.0, 0.0);
     Plan plan = Plan(center, vertices_cote, vertices_cote);
-    plan.setRandomHeight();
     plan.drawPlan(indexed_vertices, indices);
 
     // Get a handle for our "LightPosition" uniform
@@ -202,7 +229,7 @@ int main(void) {
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Rocky.png");
+    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Mountain.png");
     GLuint grass_texture = loadTexture2DFromFilePath("texture/grass.png");
     GLuint rock_texture = loadTexture2DFromFilePath("texture/rock.png");
     GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
@@ -238,7 +265,7 @@ int main(void) {
 
         if (heightmap != -1) {
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, grass_texture);
+            glBindTexture(GL_TEXTURE_2D, heightmap);
             glUniform1i(glGetUniformLocation(programID, "heightmap"), 0);
         }
         if (grass_texture != -1) {
@@ -267,6 +294,17 @@ int main(void) {
             GL_FALSE,  // normalized?
             0,         // stride
             (void*)0   // array buffer offset
+        );
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, uv);
+        glVertexAttribPointer(
+            1,        // attribute
+            2,        // size
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            0,        // stride
+            (void *)0 // array buffer offset
         );
 
         // Index buffer
