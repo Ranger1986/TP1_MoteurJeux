@@ -258,12 +258,15 @@ int main(void) {
 
         viewMatrix = lookAt(camera_position, camera_target, camera_up);
         projectionMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+        mat4 tempViewMat = rotate(viewMatrix,radians(45.0f), vec3(1.0,0.0,0.0));
+        mat4 MVP;
         if (camorbitale) {
-            viewMatrix = rotate(viewMatrix, radians(angle / 10), camera_up);
+            tempViewMat = rotate(tempViewMat, radians(angle / 10), camera_up);
             angle+=angle_coef;
+            MVP = projectionMatrix * tempViewMat * modelMatrix;
+        }else{
+            MVP = projectionMatrix * viewMatrix * modelMatrix;
         }
-
-        mat4 MVP = projectionMatrix * viewMatrix * modelMatrix;
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
         glUniformMatrix4fv(MVPlocation, 1, GL_FALSE, &MVP[0][0]);
 
@@ -368,7 +371,7 @@ void processInput(GLFWwindow* window) {
         camorbitale = false;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         camlibre = false;
         camfixe = false;
         camorbitale = true;
@@ -376,12 +379,12 @@ void processInput(GLFWwindow* window) {
     if (camlibre) {
         // Déplacer la caméra vers l'avant
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-            camera_position += cameraSpeed * normalize(camera_position - camera_target);
+            camera_position -= cameraSpeed * normalize(camera_position - camera_target);
         }
 
         // Déplacer la caméra vers l'arrière
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-            camera_position -= cameraSpeed * normalize(camera_position - camera_target);
+            camera_position += cameraSpeed * normalize(camera_position - camera_target);
         }
 
         // Déplacer la caméra vers la droite
@@ -409,15 +412,6 @@ void processInput(GLFWwindow* window) {
         }
     }
     if (camorbitale) {
-        // Déplacer la caméra vers le haut
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            camera_position += vec3{0, 1, 0} * cameraSpeed;
-        }
-
-        // Déplacer la caméra vers le bas
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            camera_position -= vec3{0, 1, 0} * cameraSpeed;
-        }
         // Déplacer la caméra vers l'avant
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
             camera_position += cameraSpeed * camera_front;
