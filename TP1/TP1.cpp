@@ -29,6 +29,7 @@ void processInput(GLFWwindow* window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+int vertices_cote = 16;
 
 // camera
 glm::vec3 camera_position = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -44,6 +45,7 @@ float lastFrame = 0.0f;
 
 // rotation
 float angle = 0.;
+float angle_coef = 1.;
 float zoom = 1.;
 
 /*******************************************************************************/
@@ -65,19 +67,19 @@ class Plan {
     vec3 center;
     int width_vertices;
     int length_vertices;
-    float vertices_distance;
+    float cote_distance;
     vector<vector<float>> heights;
 
    public:
     Plan(vec3 center, int width_vertices, int length_vertices);
     void setRandomHeight();
-    void drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices);
+    void drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,std::vector<float> &texCoords);
 };
 Plan::Plan(vec3 center, int width_vertices, int length_vertices) {
     this->center = center;
     this->width_vertices = width_vertices;
     this->length_vertices = length_vertices;
-    this->vertices_distance = 2;
+    this->cote_distance = 10;
     for (int i = 0; i < width_vertices; i++) {
         vector<float> witdh_height;
         for (int i = 0; i < length_vertices; i++) {
@@ -93,15 +95,18 @@ void Plan::setRandomHeight() {
         }
     }
 }
-void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices) {
-    float half_width = (width_vertices - 1) * vertices_distance / 2.0f;
-    float half_length = (length_vertices - 1) * vertices_distance / 2.0f;
+void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,std::vector<float> &texCoords) {
+    indexed_vertices.clear();
+    indices.clear();
+    texCoords.clear();
+    float half_width = cote_distance / 2;
+    float half_length =  cote_distance / 2;
     for (int i = 0; i < width_vertices; i++) {
         for (int j = 0; j < length_vertices; j++) {
             indexed_vertices.push_back(center +
-                                       vec3(vertices_distance * j - half_width,
+                                       vec3(cote_distance/length_vertices * j - half_width,
                                             heights[i][j],
-                                            vertices_distance * i - half_length));
+                                            cote_distance/width_vertices * i - half_length));
             texCoords.push_back((float)i / (float)width_vertices);
             texCoords.push_back((float)j / (float)length_vertices);
         }
@@ -215,11 +220,6 @@ int main(void) {
     viewMatrix = mat4(1.f);
     projectionMatrix = mat4(1.f);
 
-    // Plan
-    float vertices_cote = 16;
-    vec3 center = vec3(0.0, 0.0, 0.0);
-    Plan plan = Plan(center, vertices_cote, vertices_cote);
-    plan.drawPlan(indexed_vertices, indices);
 
     // Get a handle for our "LightPosition" uniform
     glUseProgram(programID);
@@ -235,6 +235,10 @@ int main(void) {
     GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
 
     do {
+        // Plan
+        vec3 center = vec3(0.0, 0.0, 0.0);
+        Plan plan = Plan(center, vertices_cote, vertices_cote);
+        plan.drawPlan(indexed_vertices, indices, texCoords);
         // Measure speed
         // per-frame time logic
         // --------------------
@@ -256,7 +260,7 @@ int main(void) {
         projectionMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
         if (camorbitale) {
             viewMatrix = rotate(viewMatrix, radians(angle / 10), camera_up);
-            angle++;
+            angle+=angle_coef;
         }
 
         mat4 MVP = projectionMatrix * viewMatrix * modelMatrix;
@@ -423,6 +427,24 @@ void processInput(GLFWwindow* window) {
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
             camera_position -= cameraSpeed * camera_front;
         }
+        // Déplacer la caméra vers l'avant
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            if(angle_coef>0){angle_coef -= 1;}
+        }
+
+        // Déplacer la caméra vers l'arrière
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+            angle_coef += 1;
+        }
+    }
+    // Déplacer la caméra vers l'avant
+    if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
+        if(vertices_cote>0){vertices_cote -= 1;}
+    }
+
+    // Déplacer la caméra vers l'arrière
+    if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
+        vertices_cote += 1;
     }
 }
 
