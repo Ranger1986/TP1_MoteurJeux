@@ -24,6 +24,7 @@ using namespace std;
 #include <common/shader.hpp>
 #include <common/texture.hpp>
 #include <common/vboindexer.hpp>
+#include "src/Plan.h"
 
 void processInput(GLFWwindow* window);
 // settings
@@ -62,99 +63,6 @@ GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
 
-class Plan {
-   private:
-    vec3 center;
-    int width_vertices;
-    int length_vertices;
-    float cote_distance;
-    vector<vector<float>> heights;
-
-   public:
-    Plan(vec3 center, int width_vertices, int length_vertices);
-    void setRandomHeight();
-    void drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,std::vector<float> &texCoords);
-};
-Plan::Plan(vec3 center, int width_vertices, int length_vertices) {
-    this->center = center;
-    this->width_vertices = width_vertices;
-    this->length_vertices = length_vertices;
-    this->cote_distance = 10;
-    for (int i = 0; i < width_vertices; i++) {
-        vector<float> witdh_height;
-        for (int i = 0; i < length_vertices; i++) {
-            witdh_height.push_back(0);
-        }
-        heights.push_back(witdh_height);
-    }
-}
-void Plan::setRandomHeight() {
-    for (int i = 0; i < width_vertices; i++) {
-        for (int j = 0; j < length_vertices; j++) {
-            heights[i][j] = static_cast<float>(rand()) / RAND_MAX - 0.5;
-        }
-    }
-}
-void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,std::vector<float> &texCoords) {
-    indexed_vertices.clear();
-    indices.clear();
-    texCoords.clear();
-    float half_width = cote_distance / 2;
-    float half_length =  cote_distance / 2;
-    for (int i = 0; i < width_vertices; i++) {
-        for (int j = 0; j < length_vertices; j++) {
-            indexed_vertices.push_back(center +
-                                       vec3(cote_distance/length_vertices * j - half_width,
-                                            heights[i][j],
-                                            cote_distance/width_vertices * i - half_length));
-            texCoords.push_back((float)i / (float)width_vertices);
-            texCoords.push_back((float)j / (float)length_vertices);
-        }
-    }
-    for (int i = 0; i < width_vertices - 1; i++) {
-        for (int j = 0; j < length_vertices - 1; j++) {
-            indices.push_back(i * length_vertices + j);
-            indices.push_back((i + 1) * length_vertices + j);
-            indices.push_back((i + 1) * length_vertices + j + 1);
-
-            indices.push_back(i * length_vertices + j);
-            indices.push_back(i * length_vertices + j + 1);
-            indices.push_back((i + 1) * length_vertices + j + 1);
-
-            texCoords.push_back((float)(i + 1) / (float)width_vertices);
-            texCoords.push_back((float)j / (float)length_vertices);
-
-            texCoords.push_back((float)(i + 1) / (float)width_vertices);
-            texCoords.push_back((float)(j + 1) / (float)length_vertices);
-
-            texCoords.push_back((float)(i) / (float)width_vertices);
-            texCoords.push_back((float)(j + 1) / (float)length_vertices);
-
-            texCoords.push_back((float)(i) / (float)width_vertices);
-            texCoords.push_back((float)j / (float)length_vertices);
-
-            texCoords.push_back((float)(i + 1) / (float)width_vertices);
-            texCoords.push_back((float)(j) / (float)length_vertices);
-
-            texCoords.push_back((float)(i) / (float)width_vertices);
-            texCoords.push_back((float)(j + 1) / (float)length_vertices);
-
-        }
-    }
-    // Load it into a VBO
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-    // Generate a buffer for the indices as well
-    glGenBuffers(1, &elementbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
-
-    glGenBuffers(1, &uv);
-    glBindBuffer(GL_ARRAY_BUFFER, uv);
-    glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(unsigned short), &texCoords[0], GL_STATIC_DRAW);
-}
 int main(void) {
     // Initialise GLFW
     if (!glfwInit()) {
@@ -239,6 +147,19 @@ int main(void) {
         vec3 center = vec3(0.0, 0.0, 0.0);
         Plan plan = Plan(center, vertices_cote, vertices_cote);
         plan.drawPlan(indexed_vertices, indices, texCoords);
+        // Load it into a VBO
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
+
+        // Generate a buffer for the indices as well
+        glGenBuffers(1, &elementbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+
+        glGenBuffers(1, &uv);
+        glBindBuffer(GL_ARRAY_BUFFER, uv);
+        glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(unsigned short), &texCoords[0], GL_STATIC_DRAW);
         // Measure speed
         // per-frame time logic
         // --------------------

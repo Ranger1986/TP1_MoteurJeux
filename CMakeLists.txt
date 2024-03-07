@@ -56,6 +56,8 @@ add_definitions(
 # TP1
 add_executable(TP1
         TP1/TP1.cpp
+	TP1/src/Plan.cpp
+	TP1/src/Plan.h
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
