@@ -66,25 +66,25 @@ GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
 
-Scene createFirstScene() {
-    Scene sceneMere = Scene();
+Scene * createFirstScene() {
+    Scene  * sceneMere = new Scene;
     // create one plan
-    Scene scene1 = Scene();
+    Scene * scene1 = new Scene;
     vec3 center1 = vec3(0.0, 0.0, 0.0);
     Plan plan1 = Plan(center1, vertices_cote, vertices_cote);
-    plan1.drawPlan(scene1.indexed_vertices, scene1.indices, scene1.texCoords);
+    plan1.drawPlan(scene1->indexed_vertices, scene1->indices, scene1->texCoords);
     // create second plan
-    Scene scene2 = Scene();
+    Scene * scene2 = new Scene;
     vec3 center2 = vec3(0.0, 0.0, 0.0);
     Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
-    plan2.drawPlan(scene2.indexed_vertices, scene2.indices, scene2.texCoords);
-    scene2.transform.t=vec3(1.0,1.0,1.0);
+    plan2.drawPlan(scene2->indexed_vertices, scene2->indices, scene2->texCoords);
+    scene2->transform.t=vec3(1.0,1.0,1.0);
     // create third plan
-    Scene scene3 = Scene();
+    Scene * scene3 = new Scene;
     vec3 center3 = vec3(0.0, 0.0, 0.0);
     Plan plan3 = Plan(center3, vertices_cote, vertices_cote);
-    plan3.drawPlan(scene3.indexed_vertices, scene3.indices, scene3.texCoords);
-    scene3.transform.t=vec3(1.0,1.0,1.0);
+    plan3.drawPlan(scene3->indexed_vertices, scene3->indices, scene3->texCoords);
+    scene3->transform.t=vec3(1.0,1.0,1.0);
     /*
     vec3 center2 = vec3(5.0, 0.0, 0.0);
     vector<vec3> plan2_vertices;
@@ -93,9 +93,9 @@ Scene createFirstScene() {
     Scene scene2 = Scene();
     scene2.setVertices(plan2_vertices);
     */
-    sceneMere.addChild(scene1);
-    sceneMere.addChild(scene2);
-    scene2.addChild(scene3);
+    sceneMere->addChild(scene1);
+    scene1->addChild(scene2);
+    scene1->addChild(scene3);
     return sceneMere;
 }
 
@@ -182,10 +182,10 @@ int main(void) {
         indices.clear();
         texCoords.clear();
         // Plan
-        Scene firstScene = createFirstScene();
-        indexed_vertices = firstScene.getVertices();
-        indices = firstScene.getIndices();
-        texCoords = firstScene.getTexCoords();;
+        Scene * firstScene = createFirstScene();
+        indexed_vertices = firstScene->getVertices();
+        indices = firstScene->getIndices();
+        texCoords = firstScene->getTexCoords();;
         // Load it into a VBO
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
