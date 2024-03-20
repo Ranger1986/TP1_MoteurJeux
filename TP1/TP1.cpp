@@ -66,25 +66,25 @@ GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
 
-Scene * createFirstScene() {
-    Scene  * sceneMere = new Scene;
+Scene* createFirstScene() {
+    Scene* sceneMere = new Scene;
     // create one plan
-    Scene * scene1 = new Scene;
+    Scene* scene1 = new Scene;
     vec3 center1 = vec3(0.0, 0.0, 0.0);
     Plan plan1 = Plan(center1, vertices_cote, vertices_cote);
     plan1.drawPlan(scene1->indexed_vertices, scene1->indices, scene1->texCoords);
     // create second plan
-    Scene * scene2 = new Scene;
+    Scene* scene2 = new Scene;
     vec3 center2 = vec3(0.0, 0.0, 0.0);
     Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
     plan2.drawPlan(scene2->indexed_vertices, scene2->indices, scene2->texCoords);
-    scene2->transform.t=vec3(1.0,1.0,1.0);
+    scene2->transform.t = vec3(1.0, 1.0, 1.0);
     // create third plan
-    Scene * scene3 = new Scene;
+    Scene* scene3 = new Scene;
     vec3 center3 = vec3(0.0, 0.0, 0.0);
     Plan plan3 = Plan(center3, vertices_cote, vertices_cote);
     plan3.drawPlan(scene3->indexed_vertices, scene3->indices, scene3->texCoords);
-    scene3->transform.t=vec3(1.0,1.0,1.0);
+    scene3->transform.t = vec3(1.0, 1.0, 1.0);
     /*
     vec3 center2 = vec3(5.0, 0.0, 0.0);
     vector<vec3> plan2_vertices;
@@ -97,6 +97,50 @@ Scene * createFirstScene() {
     scene1->addChild(scene2);
     scene1->addChild(scene3);
     return sceneMere;
+}
+Scene* createSolarSystem() {
+    Scene* solarSystem = new Scene;
+    std::string filename("sphere.off");
+
+    Scene* sun = new Scene;
+    loadOFF(filename, sun->indexed_vertices, sun->indices);
+    sun->transform.m=mat3{
+        cos(radians(180.f)),0,sin(radians(180.f)),
+        0,1,0,
+        -sin(radians(180.f)),0,cos(radians(180.f))
+    };
+    
+
+    Scene* earth = new Scene;
+    earth->transform.t = vec3(5.0, 0.0, 0.0);
+    /*
+    earth->transform.m = mat3{
+        0.5, 0, 0,
+        0, 0.5, 0,
+        0, 0, 0.5};
+    */
+    earth->transform.m=mat3{
+        cos(radians(180.f)),0,sin(radians(180.f)),
+        0,1,0,
+        -sin(radians(180.f)),0,cos(radians(180.f))
+    };
+    loadOFF(filename, earth->indexed_vertices, earth->indices);
+
+    Scene* moon = new Scene;
+    moon->transform.t = vec3(3.0, 0.0, 0.0);
+    /*
+    moon->transform.m = mat3{
+        0.5, 0, 0,
+        0, 0.5, 0,
+        0, 0, 0.5};
+    */
+    loadOFF(filename, moon->indexed_vertices, moon->indices);
+
+    solarSystem->addChild(sun);
+    sun->addChild(earth);
+    earth->addChild(moon);
+
+    return solarSystem;
 }
 
 int main(void) {
@@ -182,10 +226,11 @@ int main(void) {
         indices.clear();
         texCoords.clear();
         // Plan
-        Scene * firstScene = createFirstScene();
+        Scene* firstScene = createSolarSystem();
         indexed_vertices = firstScene->getVertices();
         indices = firstScene->getIndices();
-        texCoords = firstScene->getTexCoords();;
+        texCoords = firstScene->getTexCoords();
+        ;
         // Load it into a VBO
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);

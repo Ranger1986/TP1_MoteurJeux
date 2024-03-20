@@ -1,6 +1,8 @@
 #include "Scene.h"
 Scene::Scene(/* args */)
 {
+    this->transform.m=mat3(1.0);
+    this->transform.t=vec3(0.0);
 }
 void Scene::addChild(Scene *child){
     children.push_back(child);

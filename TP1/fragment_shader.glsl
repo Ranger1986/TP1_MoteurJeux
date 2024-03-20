@@ -13,6 +13,8 @@ uniform sampler2D rock;
 uniform sampler2D snow;
 
 void main(){
+    color = vec3(0.8,0,0);
+    /*
     if (height > 3){
         FragColor=texture(snow,o_uv0);
     } else if (height > 0){
@@ -20,4 +22,5 @@ void main(){
     } else {
         FragColor=texture(grass,o_uv0);
     }
+    */
 }
