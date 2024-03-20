@@ -58,6 +58,10 @@ add_executable(TP1
         TP1/TP1.cpp
 	TP1/src/Plan.cpp
 	TP1/src/Plan.h
+	TP1/src/Scene.cpp
+	TP1/src/Scene.h
+	TP1/src/Transform.cpp
+	TP1/src/Transform.h
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp

@@ -16,7 +16,8 @@ out vec2 o_uv0;
 
 void main(){
         o_uv0=uv;
-        vec3 pos=vec3(vertices_position_modelspace.x, texture(heightmap, uv).r*10-5, vertices_position_modelspace.z);
+        //vec3 pos=vec3(vertices_position_modelspace.x, texture(heightmap, uv).r*10-5, vertices_position_modelspace.z);
+        vec3 pos=vec3(vertices_position_modelspace.x, vertices_position_modelspace.y, vertices_position_modelspace.z);
         gl_Position = MVP * vec4(pos,1);
         height = pos.y;
 }

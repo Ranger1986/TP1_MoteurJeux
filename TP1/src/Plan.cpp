@@ -21,9 +21,6 @@ void Plan::setRandomHeight() {
     }
 }
 void Plan::drawPlan(std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices,std::vector<float> &texCoords) {
-    indexed_vertices.clear();
-    indices.clear();
-    texCoords.clear();
     float half_width = cote_distance / 2;
     float half_length =  cote_distance / 2;
     for (int i = 0; i < width_vertices; i++) {

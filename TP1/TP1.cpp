@@ -24,7 +24,10 @@ using namespace std;
 #include <common/shader.hpp>
 #include <common/texture.hpp>
 #include <common/vboindexer.hpp>
+
 #include "src/Plan.h"
+#include "src/Scene.h"
+#include "src/Transform.h"
 
 void processInput(GLFWwindow* window);
 // settings
@@ -63,6 +66,39 @@ GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
 
+Scene createFirstScene() {
+    Scene sceneMere = Scene();
+    // create one plan
+    Scene scene1 = Scene();
+    vec3 center1 = vec3(0.0, 0.0, 0.0);
+    Plan plan1 = Plan(center1, vertices_cote, vertices_cote);
+    plan1.drawPlan(scene1.indexed_vertices, scene1.indices, scene1.texCoords);
+    // create second plan
+    Scene scene2 = Scene();
+    vec3 center2 = vec3(0.0, 0.0, 0.0);
+    Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
+    plan2.drawPlan(scene2.indexed_vertices, scene2.indices, scene2.texCoords);
+    scene2.transform.t=vec3(1.0,1.0,1.0);
+    // create third plan
+    Scene scene3 = Scene();
+    vec3 center3 = vec3(0.0, 0.0, 0.0);
+    Plan plan3 = Plan(center3, vertices_cote, vertices_cote);
+    plan3.drawPlan(scene3.indexed_vertices, scene3.indices, scene3.texCoords);
+    scene3.transform.t=vec3(1.0,1.0,1.0);
+    /*
+    vec3 center2 = vec3(5.0, 0.0, 0.0);
+    vector<vec3> plan2_vertices;
+    Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
+    plan2.drawPlan(plan2_vertices, indices, texCoords);
+    Scene scene2 = Scene();
+    scene2.setVertices(plan2_vertices);
+    */
+    sceneMere.addChild(scene1);
+    sceneMere.addChild(scene2);
+    scene2.addChild(scene3);
+    return sceneMere;
+}
+
 int main(void) {
     // Initialise GLFW
     if (!glfwInit()) {
@@ -78,7 +114,7 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Open a window and create its OpenGL context
-    window = glfwCreateWindow(1024, 768, "TP1 - GLFW", NULL, NULL);
+    window = glfwCreateWindow(1024, 768, "TP - GLFW", NULL, NULL);
     if (window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
         getchar();
@@ -128,7 +164,6 @@ int main(void) {
     viewMatrix = mat4(1.f);
     projectionMatrix = mat4(1.f);
 
-
     // Get a handle for our "LightPosition" uniform
     glUseProgram(programID);
     GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
@@ -143,10 +178,14 @@ int main(void) {
     GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
 
     do {
+        indexed_vertices.clear();
+        indices.clear();
+        texCoords.clear();
         // Plan
-        vec3 center = vec3(0.0, 0.0, 0.0);
-        Plan plan = Plan(center, vertices_cote, vertices_cote);
-        plan.drawPlan(indexed_vertices, indices, texCoords);
+        Scene firstScene = createFirstScene();
+        indexed_vertices = firstScene.getVertices();
+        indices = firstScene.getIndices();
+        texCoords = firstScene.getTexCoords();;
         // Load it into a VBO
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -179,13 +218,13 @@ int main(void) {
 
         viewMatrix = lookAt(camera_position, camera_target, camera_up);
         projectionMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-        mat4 tempViewMat = rotate(viewMatrix,radians(45.0f), vec3(1.0,0.0,0.0));
+        mat4 tempViewMat = rotate(viewMatrix, radians(45.0f), vec3(1.0, 0.0, 0.0));
         mat4 MVP;
         if (camorbitale) {
             tempViewMat = rotate(tempViewMat, radians(angle / 10), camera_up);
-            angle+=angle_coef;
+            angle += angle_coef;
             MVP = projectionMatrix * tempViewMat * modelMatrix;
-        }else{
+        } else {
             MVP = projectionMatrix * viewMatrix * modelMatrix;
         }
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
@@ -197,17 +236,17 @@ int main(void) {
             glUniform1i(glGetUniformLocation(programID, "heightmap"), 0);
         }
         if (grass_texture != -1) {
-            glActiveTexture(GL_TEXTURE0+1);
+            glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, grass_texture);
             glUniform1i(glGetUniformLocation(programID, "grass"), 1);
         }
         if (rock_texture != -1) {
-            glActiveTexture(GL_TEXTURE0+2);
+            glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, rock_texture);
             glUniform1i(glGetUniformLocation(programID, "rock"), 2);
         }
         if (snowrocks_texture != -1) {
-            glActiveTexture(GL_TEXTURE0+3);
+            glActiveTexture(GL_TEXTURE0 + 3);
             glBindTexture(GL_TEXTURE_2D, snowrocks_texture);
             glUniform1i(glGetUniformLocation(programID, "snow"), 3);
         }
@@ -227,12 +266,12 @@ int main(void) {
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, uv);
         glVertexAttribPointer(
-            1,        // attribute
-            2,        // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            0,        // stride
-            (void *)0 // array buffer offset
+            1,         // attribute
+            2,         // size
+            GL_FLOAT,  // type
+            GL_FALSE,  // normalized?
+            0,         // stride
+            (void*)0   // array buffer offset
         );
 
         // Index buffer
@@ -344,7 +383,9 @@ void processInput(GLFWwindow* window) {
         }
         // Déplacer la caméra vers l'avant
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            if(angle_coef>0){angle_coef -= 1;}
+            if (angle_coef > 0) {
+                angle_coef -= 1;
+            }
         }
 
         // Déplacer la caméra vers l'arrière
@@ -354,7 +395,9 @@ void processInput(GLFWwindow* window) {
     }
     // Déplacer la caméra vers l'avant
     if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
-        if(vertices_cote>0){vertices_cote -= 1;}
+        if (vertices_cote > 0) {
+            vertices_cote -= 1;
+        }
     }
 
     // Déplacer la caméra vers l'arrière
