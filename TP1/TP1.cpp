@@ -60,11 +60,13 @@ mat4 projectionMatrix;
 // donnees 3d
 vector<unsigned short> indices;
 vector<vec3> indexed_vertices;
+vector<vec3> indexed_color;
 vector<float> texCoords;
 // buffers
 GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
+GLuint colorbuffer;
 
 int main(void) {
     // Initialise GLFW
@@ -144,8 +146,9 @@ int main(void) {
     std::string filename("sphere.off");
 
     Scene* sun = new Scene;
-    loadOFF(filename, sun->indexed_vertices, sun->indices);
     sun->transform.rotz(23.44);
+    loadOFF(filename, sun->indexed_vertices, sun->indices);
+    sun->color=vec3(1.f,1.f,0.f);
 
     Scene* earth_node = new Scene;
     earth_node->transform.scale(0.5f);
@@ -153,6 +156,7 @@ int main(void) {
     earth_node->transform.rotz(5.14f);
     Scene* earth_mesh = new Scene;
     loadOFF(filename, earth_mesh->indexed_vertices, earth_mesh->indices);
+    earth_mesh->color=vec3(0.2,0.2,0.8);
 
     Scene* moon_node = new Scene;
     moon_node->transform.scale(static_cast<float>(1.738/6.378));
@@ -160,6 +164,7 @@ int main(void) {
     moon_node->transform.rotz(6.68f);
     Scene* moon_mesh = new Scene;
     loadOFF(filename, moon_mesh->indexed_vertices, moon_mesh->indices);
+    moon_mesh->color=vec3(0.5,0.5,0.5);
 
     solarSystem->addChild(sun);
     sun->addChild(earth_node);
@@ -171,11 +176,13 @@ int main(void) {
         indexed_vertices.clear();
         indices.clear();
         texCoords.clear();
+        indexed_color.clear();
         // Plan
         sun->transform.roty(360.f/365/2);
         earth_node->transform.roty(360.f/24/2);
         moon_node->transform.roty(1);
         indexed_vertices = solarSystem->getVertices();
+        indexed_color = solarSystem->getColor();
         indices = solarSystem->getIndices();
         texCoords = solarSystem->getTexCoords();
         // Load it into a VBO
@@ -191,6 +198,10 @@ int main(void) {
         glGenBuffers(1, &uv);
         glBindBuffer(GL_ARRAY_BUFFER, uv);
         glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(unsigned short), &texCoords[0], GL_STATIC_DRAW);
+        //std::cout << indexed_color[0][0] << std::endl;
+        glGenBuffers(1, &colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBufferData(GL_ARRAY_BUFFER, indexed_color.size() * sizeof(glm::vec3), &indexed_color[0], GL_STATIC_DRAW);
         // Measure speed
         // per-frame time logic
         // --------------------
@@ -243,6 +254,17 @@ int main(void) {
             0,         // stride
             (void*)0   // array buffer offset
         );
+        
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glVertexAttribPointer(
+            2,         // attribute
+            3,         // size
+            GL_FLOAT,  // type
+            GL_FALSE,  // normalized?
+            0,         // stride
+            (void*)0   // array buffer offset
+        );
 
         // Index buffer
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
@@ -270,6 +292,7 @@ int main(void) {
     glDeleteBuffers(1, &elementbuffer);
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
+    glDeleteBuffers(1, &colorbuffer);
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();

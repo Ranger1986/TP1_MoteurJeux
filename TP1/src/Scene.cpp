@@ -26,6 +26,23 @@ vector<vec3> Scene::getVertices(){
     }
     return result_vertices;
 }
+vector<vec3> Scene::getColor(){
+    vector<vec3> indexed_color;
+    for (size_t i = 0; i < indexed_vertices.size(); i++)
+    {
+        indexed_color.push_back(color);
+    }
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        vector<vec3> child_color = children[i]->getColor();
+        for (size_t j = 0; j < child_color.size(); j++)
+        {
+            indexed_color.push_back(child_color[j]);
+        }
+    }
+    return indexed_color;
+
+}
 vector<unsigned short> Scene::getIndices(){
     vector<unsigned short> result_indices = indices;
     long indices_size= indexed_vertices.size();
