@@ -64,6 +64,7 @@ add_executable(TP1
 	TP1/src/Transform.h
 	common/shader.cpp
 	common/shader.hpp
+	common/stb_image.h
 	common/controls.cpp
 	common/controls.hpp
 	common/texture.cpp

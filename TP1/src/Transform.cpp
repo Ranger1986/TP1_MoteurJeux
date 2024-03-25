@@ -4,6 +4,16 @@ Transform::Transform()
     this->m=mat3{1.f};
     this->t=vec3{0.0f};
 }
+Transform::Transform(mat3 matrice)
+{
+    this->m=matrice;
+    this->t=vec3{0.0f};
+}
+Transform::Transform(vec3 translation)
+{
+    this->m=mat3{1.f};
+    this->t=translation;
+}
 Transform::Transform(mat3 m, vec3 t)
 {
     this->m=m;

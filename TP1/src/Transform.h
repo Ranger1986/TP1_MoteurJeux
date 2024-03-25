@@ -12,6 +12,8 @@ public:
     // translation
     vec3 t;
     Transform();
+    Transform(mat3 matrice);
+    Transform(vec3 translation);
     Transform(mat3 m, vec3 t);
     vec3 applyToPoint(vec3 p);
     vec3 applyToVector(vec3 v);

@@ -230,7 +230,6 @@ int main(void) {
         indexed_vertices = firstScene->getVertices();
         indices = firstScene->getIndices();
         texCoords = firstScene->getTexCoords();
-        ;
         // Load it into a VBO
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
