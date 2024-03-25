@@ -19,6 +19,30 @@ Transform::Transform(mat3 m, vec3 t)
     this->m=m;
     this->t=t;
 }
+void Transform::rotx(float angle){
+    mat3 mat_rot={
+        1,0,0,
+        0,cos(radians(angle)),-sin(radians(angle)),
+        0,sin(radians(angle)),cos(radians(angle)),
+    };
+    this->m=m*mat_rot;
+}
+void Transform::roty(float angle){
+    mat3 mat_rot={
+        cos(radians(angle)),0,sin(radians(angle)),
+        0,1,0,
+        -sin(radians(angle)),0,cos(radians(angle))
+    };
+    this->m=m*mat_rot;
+}
+void Transform::rotz(float angle){
+    mat3 mat_rot={
+        cos(radians(angle)),-sin(radians(angle)),0,
+       sin(radians(angle)),cos(radians(angle)),0,
+       0,0,1
+    };
+    this->m=m*mat_rot;
+}
 vec3 Transform::applyToPoint(vec3 p){
     return m*p+t;
 }

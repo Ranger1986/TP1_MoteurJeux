@@ -15,6 +15,9 @@ public:
     Transform(mat3 matrice);
     Transform(vec3 translation);
     Transform(mat3 m, vec3 t);
+    void rotx(float angle);
+    void roty(float angle);
+    void rotz(float angle);
     vec3 applyToPoint(vec3 p);
     vec3 applyToVector(vec3 v);
 

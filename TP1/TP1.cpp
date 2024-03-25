@@ -104,36 +104,15 @@ Scene* createSolarSystem() {
 
     Scene* sun = new Scene;
     loadOFF(filename, sun->indexed_vertices, sun->indices);
-    sun->transform.m=mat3{
-        cos(radians(180.f)),0,sin(radians(180.f)),
-        0,1,0,
-        -sin(radians(180.f)),0,cos(radians(180.f))
-    };
-    
+    sun->transform.roty(180);
 
     Scene* earth = new Scene;
     earth->transform.t = vec3(5.0, 0.0, 0.0);
-    /*
-    earth->transform.m = mat3{
-        0.5, 0, 0,
-        0, 0.5, 0,
-        0, 0, 0.5};
-    */
-    earth->transform.m=mat3{
-        cos(radians(180.f)),0,sin(radians(180.f)),
-        0,1,0,
-        -sin(radians(180.f)),0,cos(radians(180.f))
-    };
+    earth->transform.roty(180);
     loadOFF(filename, earth->indexed_vertices, earth->indices);
 
     Scene* moon = new Scene;
     moon->transform.t = vec3(3.0, 0.0, 0.0);
-    /*
-    moon->transform.m = mat3{
-        0.5, 0, 0,
-        0, 0.5, 0,
-        0, 0, 0.5};
-    */
     loadOFF(filename, moon->indexed_vertices, moon->indices);
 
     solarSystem->addChild(sun);
@@ -221,12 +200,13 @@ int main(void) {
     GLuint rock_texture = loadTexture2DFromFilePath("texture/rock.png");
     GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
 
+    Scene* firstScene = createSolarSystem();
     do {
         indexed_vertices.clear();
         indices.clear();
         texCoords.clear();
         // Plan
-        Scene* firstScene = createSolarSystem();
+        firstScene->transform.roty(1);
         indexed_vertices = firstScene->getVertices();
         indices = firstScene->getIndices();
         texCoords = firstScene->getTexCoords();
