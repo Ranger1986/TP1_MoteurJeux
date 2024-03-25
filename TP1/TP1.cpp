@@ -66,62 +66,6 @@ GLuint vertexbuffer;
 GLuint elementbuffer;
 GLuint uv;
 
-Scene* createFirstScene() {
-    Scene* sceneMere = new Scene;
-    // create one plan
-    Scene* scene1 = new Scene;
-    vec3 center1 = vec3(0.0, 0.0, 0.0);
-    Plan plan1 = Plan(center1, vertices_cote, vertices_cote);
-    plan1.drawPlan(scene1->indexed_vertices, scene1->indices, scene1->texCoords);
-    // create second plan
-    Scene* scene2 = new Scene;
-    vec3 center2 = vec3(0.0, 0.0, 0.0);
-    Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
-    plan2.drawPlan(scene2->indexed_vertices, scene2->indices, scene2->texCoords);
-    scene2->transform.t = vec3(1.0, 1.0, 1.0);
-    // create third plan
-    Scene* scene3 = new Scene;
-    vec3 center3 = vec3(0.0, 0.0, 0.0);
-    Plan plan3 = Plan(center3, vertices_cote, vertices_cote);
-    plan3.drawPlan(scene3->indexed_vertices, scene3->indices, scene3->texCoords);
-    scene3->transform.t = vec3(1.0, 1.0, 1.0);
-    /*
-    vec3 center2 = vec3(5.0, 0.0, 0.0);
-    vector<vec3> plan2_vertices;
-    Plan plan2 = Plan(center2, vertices_cote, vertices_cote);
-    plan2.drawPlan(plan2_vertices, indices, texCoords);
-    Scene scene2 = Scene();
-    scene2.setVertices(plan2_vertices);
-    */
-    sceneMere->addChild(scene1);
-    scene1->addChild(scene2);
-    scene1->addChild(scene3);
-    return sceneMere;
-}
-Scene* createSolarSystem() {
-    Scene* solarSystem = new Scene;
-    std::string filename("sphere.off");
-
-    Scene* sun = new Scene;
-    loadOFF(filename, sun->indexed_vertices, sun->indices);
-    sun->transform.roty(180);
-
-    Scene* earth = new Scene;
-    earth->transform.t = vec3(5.0, 0.0, 0.0);
-    earth->transform.roty(180);
-    loadOFF(filename, earth->indexed_vertices, earth->indices);
-
-    Scene* moon = new Scene;
-    moon->transform.t = vec3(3.0, 0.0, 0.0);
-    loadOFF(filename, moon->indexed_vertices, moon->indices);
-
-    solarSystem->addChild(sun);
-    sun->addChild(earth);
-    earth->addChild(moon);
-
-    return solarSystem;
-}
-
 int main(void) {
     // Initialise GLFW
     if (!glfwInit()) {
@@ -195,21 +139,45 @@ int main(void) {
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    GLuint heightmap = loadTexture2DFromFilePath("texture/Heightmap_Mountain.png");
-    GLuint grass_texture = loadTexture2DFromFilePath("texture/grass.png");
-    GLuint rock_texture = loadTexture2DFromFilePath("texture/rock.png");
-    GLuint snowrocks_texture = loadTexture2DFromFilePath("texture/snowrocks.png");
+    //begin create scene
+    Scene* solarSystem = new Scene;
+    std::string filename("sphere.off");
 
-    Scene* firstScene = createSolarSystem();
+    Scene* sun = new Scene;
+    loadOFF(filename, sun->indexed_vertices, sun->indices);
+    sun->transform.rotz(23.44);
+
+    Scene* earth_node = new Scene;
+    earth_node->transform.scale(0.5f);
+    earth_node->transform.translate(vec3(5.0,0.0,0.0));
+    earth_node->transform.rotz(5.14f);
+    Scene* earth_mesh = new Scene;
+    loadOFF(filename, earth_mesh->indexed_vertices, earth_mesh->indices);
+
+    Scene* moon_node = new Scene;
+    moon_node->transform.scale(static_cast<float>(1.738/6.378));
+    moon_node->transform.translate(vec3(3.0,0.0,0.0));
+    moon_node->transform.rotz(6.68f);
+    Scene* moon_mesh = new Scene;
+    loadOFF(filename, moon_mesh->indexed_vertices, moon_mesh->indices);
+
+    solarSystem->addChild(sun);
+    sun->addChild(earth_node);
+    earth_node->addChild(earth_mesh);
+    earth_node->addChild(moon_node);
+    moon_node->addChild(moon_mesh);
+    //end create scene
     do {
         indexed_vertices.clear();
         indices.clear();
         texCoords.clear();
         // Plan
-        firstScene->transform.roty(1);
-        indexed_vertices = firstScene->getVertices();
-        indices = firstScene->getIndices();
-        texCoords = firstScene->getTexCoords();
+        sun->transform.roty(360.f/365/2);
+        earth_node->transform.roty(360.f/24/2);
+        moon_node->transform.roty(1);
+        indexed_vertices = solarSystem->getVertices();
+        indices = solarSystem->getIndices();
+        texCoords = solarSystem->getTexCoords();
         // Load it into a VBO
         glGenBuffers(1, &vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -253,28 +221,6 @@ int main(void) {
         }
         GLuint MVPlocation = glGetUniformLocation(programID, "MVP");
         glUniformMatrix4fv(MVPlocation, 1, GL_FALSE, &MVP[0][0]);
-
-        if (heightmap != -1) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, heightmap);
-            glUniform1i(glGetUniformLocation(programID, "heightmap"), 0);
-        }
-        if (grass_texture != -1) {
-            glActiveTexture(GL_TEXTURE0 + 1);
-            glBindTexture(GL_TEXTURE_2D, grass_texture);
-            glUniform1i(glGetUniformLocation(programID, "grass"), 1);
-        }
-        if (rock_texture != -1) {
-            glActiveTexture(GL_TEXTURE0 + 2);
-            glBindTexture(GL_TEXTURE_2D, rock_texture);
-            glUniform1i(glGetUniformLocation(programID, "rock"), 2);
-        }
-        if (snowrocks_texture != -1) {
-            glActiveTexture(GL_TEXTURE0 + 3);
-            glBindTexture(GL_TEXTURE_2D, snowrocks_texture);
-            glUniform1i(glGetUniformLocation(programID, "snow"), 3);
-        }
-
         // 1rst attribute buffer : vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -324,10 +270,6 @@ int main(void) {
     glDeleteBuffers(1, &elementbuffer);
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
-    glDeleteTextures(1, &heightmap);
-    glDeleteTextures(1, &grass_texture);
-    glDeleteTextures(1, &rock_texture);
-    glDeleteTextures(1, &snowrocks_texture);
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();

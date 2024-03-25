@@ -43,6 +43,12 @@ void Transform::rotz(float angle){
     };
     this->m=m*mat_rot;
 }
+void Transform::translate(vec3 translation){
+    this->t=translation;
+}
+void Transform::scale(float ratio){
+    this->m=m*(mat3(1.0)*ratio);
+}
 vec3 Transform::applyToPoint(vec3 p){
     return m*p+t;
 }

@@ -1,11 +1,13 @@
 #include "Scene.h"
 Scene::Scene(/* args */)
 {
-    this->transform.m=mat3(1.0);
-    this->transform.t=vec3(0.0);
+
 }
 void Scene::addChild(Scene *child){
     children.push_back(child);
+}
+vector<Scene *> Scene::getChildren(){
+    return children;
 }
 vector<vec3> Scene::getVertices(){
     vector<vec3> temp_vertices = indexed_vertices;

@@ -32,6 +32,7 @@ class Scene {
      * @param child
      */
     void addChild(Scene *child);
+    vector<Scene *> getChildren();
     vector<unsigned short> getIndices();
     vector<vec3> getVertices();
     vector<float> getTexCoords();
