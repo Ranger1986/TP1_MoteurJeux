@@ -1,11 +1,13 @@
 #include "Scene.h"
 Scene::Scene(/* args */)
 {
-    this->transform.m=mat3(1.0);
-    this->transform.t=vec3(0.0);
+
 }
 void Scene::addChild(Scene *child){
     children.push_back(child);
+}
+vector<Scene *> Scene::getChildren(){
+    return children;
 }
 vector<vec3> Scene::getVertices(){
     vector<vec3> temp_vertices = indexed_vertices;
@@ -23,6 +25,23 @@ vector<vec3> Scene::getVertices(){
         result_vertices.push_back(transform.applyToPoint(temp_vertices[i]));
     }
     return result_vertices;
+}
+vector<vec3> Scene::getColor(){
+    vector<vec3> indexed_color;
+    for (size_t i = 0; i < indexed_vertices.size(); i++)
+    {
+        indexed_color.push_back(color);
+    }
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        vector<vec3> child_color = children[i]->getColor();
+        for (size_t j = 0; j < child_color.size(); j++)
+        {
+            indexed_color.push_back(child_color[j]);
+        }
+    }
+    return indexed_color;
+
 }
 vector<unsigned short> Scene::getIndices(){
     vector<unsigned short> result_indices = indices;

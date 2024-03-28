@@ -21,6 +21,7 @@ class Scene {
     vector<unsigned short> indices;
     // coordonnées des points
     vector<vec3> indexed_vertices;
+    vec3 color;
     // coordonnées de texture TODO
     vector<float> texCoords;
     Scene();
@@ -32,8 +33,10 @@ class Scene {
      * @param child
      */
     void addChild(Scene *child);
+    vector<Scene *> getChildren();
     vector<unsigned short> getIndices();
     vector<vec3> getVertices();
+    vector<vec3> getColor();
     vector<float> getTexCoords();
     ~Scene();
 };
