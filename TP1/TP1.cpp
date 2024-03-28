@@ -308,6 +308,7 @@ void processInput(GLFWwindow* window) {
 
     // Vitesse de déplacement de la caméra
     float cameraSpeed = 2.5f * deltaTime;
+    /*
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
         camlibre = true;
         camfixe = false;
@@ -325,6 +326,7 @@ void processInput(GLFWwindow* window) {
         camfixe = false;
         camorbitale = true;
     }
+    */
     if (camlibre) {
         // Déplacer la caméra vers l'avant
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
